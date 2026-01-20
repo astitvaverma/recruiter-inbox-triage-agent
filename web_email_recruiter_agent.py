@@ -1,0 +1,93 @@
+import os
+import asyncio
+from dotenv import load_dotenv
+from droidrun import DroidAgent, load_llm, DroidrunConfig
+from droidrun.config_manager import AgentConfig
+
+# Load environment variables
+load_dotenv()
+
+# Classification rules
+with open("prompts/classification_rules.txt", "r") as f:
+    CLASSIFICATION_RULES = f.read()
+
+WEB_EMAIL_RECRUITER_GOAL = f"""
+You are a recruiter's AI assistant for web-based email.
+
+Open the Chrome browser.
+Navigate to Gmail.com (or any webmail).
+Sign in if needed.
+Read unread emails in the inbox.
+
+For each unread email:
+- Classify it based on these rules:
+{CLASSIFICATION_RULES}
+- Determine if it's: New Candidate, Follow-up, Interview Response, or Spam
+- Star urgent emails
+- Open the email and read the content
+- Draft a professional reply (but don't send)
+
+Provide a summary of:
+- Total emails processed
+- How many in each category
+- Any urgent items
+"""
+
+async def main():
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        print("❌ ERROR: OPENAI_API_KEY not found!")
+        print("\nCreate a .env file with:")
+        print("OPENAI_API_KEY=sk-your-key-here")
+        return
+    
+    print("✅ OpenAI API Key found")
+    print("🔄 Loading LLM (GPT-4o-mini)...")
+    llm = load_llm("OpenAI", model="gpt-4o-mini", temperature=0.2)
+    print("✅ LLM loaded successfully")
+
+    config = DroidrunConfig(
+        agent=AgentConfig(
+            max_steps=35,  # More steps for web navigation
+            reasoning=True
+        )
+    )
+
+    print("🤖 Initializing Web Email Recruiter Agent...")
+    agent = DroidAgent(
+        goal=WEB_EMAIL_RECRUITER_GOAL,
+        llms=llm,
+        config=config
+    )
+    print("✅ Agent initialized\n")
+
+    print("="*60)
+    print("🚀 STARTING WEB EMAIL TRIAGE")
+    print("="*60)
+    print("📱 Watch BlueStacks - Browser will open")
+    print("🌐 Agent will navigate to Gmail.com")
+    print("="*60 + "\n")
+    
+    handler = agent.run()
+    
+    async for event in handler.stream_events():
+        pass
+
+    result = await handler
+    
+    print("\n" + "="*60)
+    print("🏁 EMAIL TRIAGE COMPLETE")
+    print("="*60)
+    print(f"✅ Success: {result.success}")
+    print(f"📝 Summary: {result.reason}")
+    print("="*60)
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\n⚠️ Stopped by user")
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
+        import traceback
+        traceback.print_exc()

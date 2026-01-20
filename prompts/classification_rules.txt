@@ -1,0 +1,18 @@
+When reading an email:
+- If it contains resume attachments, skills, or job applications -> New Candidate
+- If it references previous emails or checking status -> Follow-up
+- If it mentions interview, time slots, or meeting links -> Interview response
+- If it is promotional or irrelevant -> Spam
+
+Urgent emails:
+- Mention deadlines
+- Mention interviews today or tomorrow
+- Mention immediate availability
+- Mention withdrawal of application
+- Priority or high-importance flags
+
+Professional Response Guidelines:
+- Be polite and concise.
+- Acknowledge receipt.
+- Do not promise anything specific without internal review.
+- Suggest next steps if appropriate (e.g., "we will review and get back to you").
